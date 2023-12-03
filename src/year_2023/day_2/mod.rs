@@ -33,14 +33,14 @@ fn is_possible(line: &str) -> bool {
     true
 }
 
-fn part_1(input: &str) -> String {
+fn part_1(input: &str) -> u32 {
     let mut ans = 0;
     for (i, line) in input.lines().enumerate() {
         if is_possible(line) {
             ans += i + 1;
         }
     }
-    ans.to_string()
+    ans as u32
 }
 
 fn power_of_cubes(line: &str) -> u32 {
@@ -71,12 +71,12 @@ fn power_of_cubes(line: &str) -> u32 {
     max_red * max_green * max_blue
 }
 
-fn part_2(input: &str) -> String {
+fn part_2(input: &str) -> u32 {
     let mut ans = 0;
     for line in input.lines() {
         ans += power_of_cubes(line);
     }
-    ans.to_string()
+    ans
 }
 
 pub fn solve() -> String {

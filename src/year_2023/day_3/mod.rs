@@ -84,7 +84,10 @@ fn parse_numbers(numbers: Vec<Number>) -> u32 {
     let mut gears = HashMap::new();
     for number in &numbers {
         for gear in &number.gear {
-            gears.entry(gear).or_insert_with(Vec::new).push(number.value);
+            gears
+                .entry(gear)
+                .or_insert_with(Vec::new)
+                .push(number.value);
         }
     }
     for (_, numbers) in gears {
