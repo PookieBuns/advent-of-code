@@ -1,5 +1,6 @@
 use advent_of_code::route;
 use clap::Parser;
+use tracing_subscriber;
 
 #[derive(Parser, Debug)]
 #[command(version)]
@@ -11,6 +12,7 @@ struct Args {
 }
 
 fn main() {
+    tracing_subscriber::fmt::init();
     let args = Args::parse();
     let result = route(args.year, args.day);
     println!("{}", result);
