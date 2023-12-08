@@ -1,6 +1,5 @@
 use advent_of_code::route;
 use clap::Parser;
-use tracing_subscriber;
 
 #[derive(Parser, Debug)]
 #[command(version)]
