@@ -32,7 +32,7 @@ impl PartialOrd for Hand {
     }
 }
 
-fn get_points(char: char) -> i32 {
+fn _get_points(char: char) -> i32 {
     match char {
         'A' => 14,
         'K' => 13,
