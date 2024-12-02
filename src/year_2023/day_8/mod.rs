@@ -43,7 +43,7 @@ fn part_1(input: &str) -> impl Display {
     }
     step
 }
-fn part_2(input: &str) -> impl Display {
+fn part_2(_input: &str) -> impl Display {
     "Unimplemented"
 }
 pub fn solve() -> String {
