@@ -16,6 +16,7 @@ pub fn route(year: u16, day: u8) -> String {
         },
         2024 => match day {
             1 => year_2024::day_1::solve(),
+            2 => year_2024::day_2::solve(),
             _ => format!("Not implemented yet for 2024 day {day}"),
         },
         _ => format!("Not implemented yet for year {year}"),
