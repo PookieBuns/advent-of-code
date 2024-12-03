@@ -16,10 +16,11 @@ struct Args {
 }
 
 fn main() {
-    // tracing_subscriber::fmt::init();
     let args = Args::parse();
-    // let result = route(args.year, args.day);
-    // println!("{}", result);
+    let cur_dir = Path::new(file!()).parent().unwrap();
+    let puzzle_dir = cur_dir.join(format!("year_{}/day_{}", args.year, args.day));
+    let input_path = puzzle_dir.join("input.txt");
+    let puzzle_path = puzzle_dir.join("puzzle.md");
     let client = AocClient::builder()
         .session_cookie_from_default_locations()
         .expect("Failed to get session cookie")
@@ -27,14 +28,19 @@ fn main() {
         .expect("Failed to get year")
         .day(args.day)
         .expect("Failed to get day")
+        .input_filename(input_path.clone())
+        .puzzle_filename(puzzle_path.clone())
         .build()
         .expect("Failed to build client");
-    let cur_dir = Path::new(file!()).parent().unwrap();
-    let file_path = cur_dir.join(format!("year_{}/day_{}/input.txt", args.year, args.day));
-    if !file_path.exists() {
+    if !puzzle_path.exists() {
+        println!("Puzzle file does not exist. Creating it now.");
+        client
+            .save_puzzle_markdown()
+            .expect("Failed to save puzzle markdown");
+    }
+    if !input_path.exists() {
         println!("Input file does not exist. Creating it now.");
-        let input = client.get_input().expect("Failed to get input");
-        std::fs::write(&file_path, input).expect("Failed to write input to file");
+        client.save_input().expect("Failed to save input");
     }
     let answer = route(args.year, args.day);
     println!("{answer}");
