@@ -11,6 +11,8 @@ struct Args {
     year: i32,
     #[arg(short, long)]
     day: u32,
+    #[arg(short, long)]
+    submit: bool,
 }
 
 fn main() {
@@ -36,4 +38,15 @@ fn main() {
     }
     let answer = route(args.year, args.day);
     println!("{answer}");
+    if args.submit {
+        println!("Submitting answers\n");
+        answer.part_1.map(|p1| {
+            println!("Submitting {p1} for part 1");
+            client.submit_answer_and_show_outcome(1, p1)
+        });
+        answer.part_2.map(|p2| {
+            println!("Submitting {p2} for part 2");
+            client.submit_answer_and_show_outcome(2, p2)
+        });
+    }
 }

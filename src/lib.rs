@@ -10,9 +10,13 @@ impl std::fmt::Display for Answer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if let Some(part_1) = self.part_1 {
             writeln!(f, "Part 1: {}", part_1)?;
+        } else {
+            writeln!(f, "Part 1: Not implemented yet")?;
         }
         if let Some(part_2) = self.part_2 {
-            write!(f, "Part 2: {}", part_2)?;
+            writeln!(f, "Part 2: {}", part_2)?;
+        } else {
+            writeln!(f, "Part 2: Not implemented yet")?;
         }
         Ok(())
     }
