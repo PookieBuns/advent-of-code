@@ -1,5 +1,6 @@
-use std::fmt::Display;
-use std::collections::HashMap;
+use std::{collections::HashMap, path::Path};
+
+use crate::Answer;
 
 fn get_nums(input: &str) -> (Vec<i32>, Vec<i32>) {
     input
@@ -13,7 +14,7 @@ fn get_nums(input: &str) -> (Vec<i32>, Vec<i32>) {
         .unzip()
 }
 
-fn part_1(input: &str) -> impl Display {
+fn part_1(input: &str) -> Option<i32> {
     let (mut left_nums, mut right_nums) = get_nums(input);
     left_nums.sort();
     right_nums.sort();
@@ -21,20 +22,26 @@ fn part_1(input: &str) -> impl Display {
         .iter()
         .zip(right_nums.iter())
         .fold(0, |acc, (left, right)| acc + (left - right).abs())
+        .into()
 }
-fn part_2(input: &str) -> impl Display {
+fn part_2(input: &str) -> Option<i32> {
     let (left_nums, right_nums) = get_nums(input);
     let right_counter = right_nums.iter().fold(HashMap::new(), |mut acc, num| {
         *acc.entry(num).or_insert(0) += 1;
         acc
     });
-    left_nums.iter().fold(0, |acc, num| {
-        acc + num * right_counter.get(num).unwrap_or(&0)
-    })
+    left_nums
+        .iter()
+        .fold(0, |acc, num| {
+            acc + num * right_counter.get(num).unwrap_or(&0)
+        })
+        .into()
 }
-pub fn solve() -> String {
-    let input = include_str!("input.txt");
-    let part_1_ans = part_1(input);
-    let part_2_ans = part_2(input);
-    format!("Part 1: {}\nPart 2: {}", part_1_ans, part_2_ans)
+pub fn solve() -> Answer {
+    let cur_dir = Path::new(file!()).parent().unwrap();
+    let file_path = cur_dir.join("input.txt");
+    let input = std::fs::read_to_string(file_path).unwrap();
+    let part_1 = part_1(&input);
+    let part_2 = part_2(&input);
+    Answer { part_1, part_2 }
 }

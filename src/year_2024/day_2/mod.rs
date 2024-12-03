@@ -1,4 +1,6 @@
-use std::fmt::Display;
+use std::path::Path;
+
+use crate::Answer;
 
 fn is_safe(nums: &[i32]) -> bool {
     let first = nums[0];
@@ -15,16 +17,20 @@ fn is_safe(nums: &[i32]) -> bool {
     })
 }
 
-fn part_1(input: &str) -> impl Display {
-    input
-        .lines()
-        .map(|line| {
-            line.split(" ")
-                .map(|num| num.parse().unwrap())
-                .collect::<Vec<i32>>()
-        })
-        .filter(|nums| is_safe(nums))
-        .count()
+fn part_1(input: &str) -> Option<i32> {
+    i32::try_from(
+        input
+            .lines()
+            .map(|line| {
+                line.split(" ")
+                    .map(|num| num.parse().unwrap())
+                    .collect::<Vec<i32>>()
+            })
+            .filter(|nums| is_safe(nums))
+            .count(),
+    )
+    .expect("Failed to convert to i32")
+    .into()
 }
 
 fn is_safe_with_remove(nums: &[i32]) -> bool {
@@ -41,20 +47,25 @@ fn is_safe_with_remove(nums: &[i32]) -> bool {
     false
 }
 
-fn part_2(input: &str) -> impl Display {
-    input
-        .lines()
-        .map(|line| {
-            line.split(" ")
-                .map(|num| num.parse().unwrap())
-                .collect::<Vec<i32>>()
-        })
-        .filter(|nums| is_safe_with_remove(nums))
-        .count()
+fn part_2(input: &str) -> Option<i32> {
+    i32::try_from(
+        input
+            .lines()
+            .map(|line| {
+                line.split(" ")
+                    .map(|num| num.parse().unwrap())
+                    .collect::<Vec<i32>>()
+            })
+            .filter(|nums| is_safe_with_remove(nums))
+            .count(),
+    )
+    .expect("Failed to convert to i32")
+    .into()
 }
-pub fn solve() -> String {
-    let input = include_str!("input.txt");
-    let part_1_ans = part_1(input);
-    let part_2_ans = part_2(input);
-    format!("Part 1: {}\nPart 2: {}", part_1_ans, part_2_ans)
+pub fn solve() -> Answer {
+    let cur_dir = Path::new(file!()).parent().unwrap();
+    let input = std::fs::read_to_string(cur_dir.join("input.txt")).unwrap();
+    let part_1 = part_1(&input);
+    let part_2 = part_2(&input);
+    Answer { part_1, part_2 }
 }
