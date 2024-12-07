@@ -25,30 +25,29 @@ fn backtrack(cur: i64, target: i64, arr: &[i64], i: usize, include_concat: bool)
     if i == arr.len() {
         return cur == target;
     }
-    let op1 = backtrack(cur + arr[i], target, arr, i + 1, include_concat);
-    if op1 {
+    if backtrack(cur + arr[i], target, arr, i + 1, include_concat) {
         return true;
     }
-    let op2 = backtrack(cur * arr[i], target, arr, i + 1, include_concat);
-    if op2 {
+
+    if backtrack(cur * arr[i], target, arr, i + 1, include_concat) {
         return true;
     }
     if include_concat {
-        let op3 = backtrack(
-            cur * 10i64.pow(arr[i].to_string().len() as u32) + arr[i],
+        let num_digits = arr[i].ilog10() + 1;
+        if backtrack(
+            cur * 10_i64.pow(num_digits) + arr[i],
             target,
             arr,
             i + 1,
             include_concat,
-        );
-        if op3 {
+        ) {
             return true;
         }
     }
     false
 }
 
-fn can_work(equation: &Equation, include_concat: bool) -> bool {
+fn can_produce(equation: &Equation, include_concat: bool) -> bool {
     backtrack(0, equation.total, &equation.parts, 0, include_concat)
 }
 
@@ -56,7 +55,7 @@ fn part_1(input: &str) -> Option<i64> {
     input
         .lines()
         .map(convert_to_equation)
-        .filter(|equation| can_work(equation, false))
+        .filter(|equation| can_produce(equation, false))
         .map(|equation| equation.total)
         .sum::<i64>()
         .into()
@@ -66,7 +65,7 @@ fn part_2(input: &str) -> Option<i64> {
     input
         .lines()
         .map(convert_to_equation)
-        .filter(|equation| can_work(equation, true))
+        .filter(|equation| can_produce(equation, true))
         .map(|equation| equation.total)
         .sum::<i64>()
         .into()
