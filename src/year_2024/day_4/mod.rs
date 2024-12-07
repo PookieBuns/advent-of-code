@@ -142,5 +142,5 @@ pub fn solve() -> Answer {
     let input = std::fs::read_to_string(file_path).unwrap();
     let part_1 = part_1(&input);
     let part_2 = part_2(&input);
-    Answer { part_1, part_2 }
+    Answer::from_parts(part_1, part_2)
 }

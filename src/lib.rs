@@ -2,8 +2,17 @@
 mod year_2024;
 
 pub struct Answer {
-    pub part_1: Option<i32>,
-    pub part_2: Option<i32>,
+    pub part_1: Option<i64>,
+    pub part_2: Option<i64>,
+}
+
+impl Answer {
+    fn from_parts<T: Into<i64>>(part_1: Option<T>, part_2: Option<T>) -> Self {
+        Self {
+            part_1: part_1.map(Into::into),
+            part_2: part_2.map(Into::into),
+        }
+    }
 }
 
 impl std::fmt::Display for Answer {
