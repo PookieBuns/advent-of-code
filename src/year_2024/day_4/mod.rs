@@ -46,7 +46,7 @@ fn search_for_xmas(chars: &[Vec<char>], row: usize, col: usize) -> i32 {
         && chars[row + 2][col + 2] == 'A'
         && chars[row + 3][col + 3] == 'S'
     {
-            count += 1;
+        count += 1;
     }
     // diagonal down left
     if row + 3 < chars.len()
