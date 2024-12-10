@@ -15,47 +15,44 @@ fn convert_to_grid(input: &str) -> Vec<Vec<i32>> {
 
 fn find_trail(grid: &[Vec<i32>], row: usize, col: usize) -> HashSet<(usize, usize)> {
     if grid[row][col] == 9 {
-        return HashSet::from_iter(vec![(row, col)].into_iter());
+        return HashSet::from_iter([(row, col)]);
     }
     let cur_h = grid[row][col];
     let dirs = [(0, 1), (0, -1), (1, 0), (-1, 0)];
-    let mut ans = HashSet::new();
-    for (dx, dy) in dirs {
+    dirs.iter().fold(HashSet::new(), |mut acc, &(dx, dy)| {
         let nrow = row as i32 + dx;
-        let ncol = col as i32 + dy;
         if nrow < 0 {
-            continue;
+            return acc;
         }
-        if nrow >= grid.len() as i32 {
-            continue;
-        }
+        let nrow = nrow as usize;
+        let ncol = col as i32 + dy;
         if ncol < 0 {
-            continue;
+            return acc;
         }
-        if ncol >= grid[nrow as usize].len() as i32 {
-            continue;
+        let ncol = ncol as usize;
+        if nrow >= grid.len() {
+            return acc;
         }
-        let n_h = grid[nrow as usize][ncol as usize];
+        if ncol >= grid[nrow].len() {
+            return acc;
+        }
+        let n_h = grid[nrow][ncol];
         if n_h - cur_h != 1 {
-            continue;
+            return acc;
         }
-        println!("{nrow},{ncol}");
-        ans.extend(find_trail(&grid, nrow as usize, ncol as usize));
-    }
-    ans
+        acc.extend(find_trail(grid, nrow, ncol));
+        acc
+    })
 }
 
 fn part_1(input: &str) -> Option<i32> {
     let grid = convert_to_grid(input);
-    let mut ans = 0;
-    for i in 0..grid.len() {
-        for j in 0..grid[i].len() {
-            if grid[i][j] == 0 {
-                ans += find_trail(&grid, i, j).len();
-            }
-        }
-    }
-    (ans as i32).into()
+    (0..grid.len())
+        .flat_map(|i| (0..grid[i].len()).map(move |j| (i, j)))
+        .filter(|&(i, j)| grid[i][j] == 0)
+        .map(|(i, j)| find_trail(&grid, i, j).len() as i32)
+        .sum::<i32>()
+        .into()
 }
 
 fn find_trail_2(grid: &[Vec<i32>], row: usize, col: usize) -> i32 {
@@ -64,42 +61,41 @@ fn find_trail_2(grid: &[Vec<i32>], row: usize, col: usize) -> i32 {
     }
     let cur_h = grid[row][col];
     let dirs = [(0, 1), (0, -1), (1, 0), (-1, 0)];
-    let mut ans = 0;
-    for (dx, dy) in dirs {
-        let nrow = row as i32 + dx;
-        let ncol = col as i32 + dy;
-        if nrow < 0 {
-            continue;
-        }
-        if nrow >= grid.len() as i32 {
-            continue;
-        }
-        if ncol < 0 {
-            continue;
-        }
-        if ncol >= grid[nrow as usize].len() as i32 {
-            continue;
-        }
-        let n_h = grid[nrow as usize][ncol as usize];
-        if n_h - cur_h != 1 {
-            continue;
-        }
-        ans += find_trail_2(&grid, nrow as usize, ncol as usize);
-    }
-    ans
+    dirs.iter()
+        .map(|(dx, dy)| {
+            let nrow = row as i32 + dx;
+            if nrow < 0 {
+                return 0;
+            }
+            let nrow = nrow as usize;
+            let ncol = col as i32 + dy;
+            if ncol < 0 {
+                return 0;
+            }
+            let ncol = ncol as usize;
+            if nrow >= grid.len() {
+                return 0;
+            }
+            if ncol >= grid[nrow].len() {
+                return 0;
+            }
+            let n_h = grid[nrow][ncol];
+            if n_h - cur_h != 1 {
+                return 0;
+            }
+            find_trail_2(grid, nrow, ncol)
+        })
+        .sum::<i32>()
 }
 
 fn part_2(input: &str) -> Option<i32> {
     let grid = convert_to_grid(input);
-    let mut ans = 0;
-    for i in 0..grid.len() {
-        for j in 0..grid[i].len() {
-            if grid[i][j] == 0 {
-                ans += find_trail_2(&grid, i, j)
-            }
-        }
-    }
-    (ans as i32).into()
+    (0..grid.len())
+        .flat_map(|i| (0..grid[i].len()).map(move |j| (i, j)))
+        .filter(|&(i, j)| grid[i][j] == 0)
+        .map(|(i, j)| find_trail_2(&grid, i, j))
+        .sum::<i32>()
+        .into()
 }
 pub fn solve() -> Answer {
     let cur_dir = Path::new(file!()).parent().unwrap();
