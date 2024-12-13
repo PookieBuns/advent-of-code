@@ -155,7 +155,7 @@ fn part_2(input: &str) -> Option<i32> {
             if c.is_ascii_lowercase() {
                 continue;
             }
-            let (area, mut borders) = calculate(&mut grid, c, row, col, &mut HashSet::new());
+            let (area, borders) = calculate(&mut grid, c, row, col, &mut HashSet::new());
             let mut sides = borders.len() as f64;
             for border in &borders {
                 match border.direction {
