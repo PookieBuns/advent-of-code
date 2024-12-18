@@ -155,7 +155,7 @@ fn is_same(register: Register, program: &[i64]) -> bool {
         }
         instruction_pointer += 2;
     }
-    return program_pointer == program.len();
+    program_pointer == program.len()
 }
 
 fn part_2(input: &str) -> Option<i64> {
