@@ -1,6 +1,6 @@
 use std::{path::Path, str::FromStr};
 
-// use rayon::prelude::*;
+use rayon::prelude::*;
 
 use crate::Answer;
 
@@ -168,84 +168,17 @@ fn part_2(input: &str) -> Option<i64> {
         .split(",")
         .map(|s| s.parse().unwrap())
         .collect();
-    // let mut x = HashMap::new();
-    // // for a in 0..1000 {
-    //     let a_mod_16 = a % 32;
-    //     let register = Register { a, ..register };
-    //     let output = run_program(register, program.clone());
-    //     x.entry(a_mod_16).or_insert_with(Vec::new).push(output[0]);
-    // }
-    // for (k, v) in x.iter() {
-    //     println!("{k}");
-    //     println!("{v:?}");
-    // }
-    // None
-    // let mut range_start = None;
-    // let mut range_end = None;
-    // for i in 0..(i64::MAX / 100000000) {
-    //     let a = i * 100000000;
-    //     println!("{:?}", a);
-    //     let register = Register { a, ..register };
-    //     let output = run_program(register, program.clone());
-    //     if output.len() == program.len() {
-    //         if range_start.is_none() {
-    //             range_start = Some(a - 100000000);
-    //         }
-    //     } else if range_start.is_some() {
-    //         range_end = Some(a);
-    //         break;
-    //     }
-    // }
     let range_start: i64 = 142279579;
-    let range_end: i64 = 281475000000000;
-    println!("{:?}", range_start);
-    println!("{:?}", range_end);
-    // let mut other_incs = vec![];
+    let range_end: i64 = 281_475_000_000_000;
     let incs = [2, 4094, 2, 4094, 2, 16769022];
-    let mut incs_iter = incs.iter().cycle();
-    let mut a = range_start;
-    // let mut prev_a = 0;
-    loop {
-        let register = Register { a, ..register };
-        // let output = run_program(register, &program);
-        // assert_eq!(output[0..7], program[0..7]);
-        // println!("{:?}", output);
-        // println!("{:?}", program);
-        // if output.len() >= 12 && (output[0..12] == program[0..12]) {
-        //     other_incs.push(a - prev_a);
-        //     println!("{:?}", other_incs);
-        //     prev_a = a;
-        //     // return None;
-        // }
-        if is_same(register, &program) {
-            return Some(a);
-        }
-        a += incs_iter.next().unwrap();
-    }
-    // None
-    // (range_start.unwrap()..range_end.unwrap())
-    //     .into_par_iter()
-    //     .filter(|&a| !matches!(a % 8, 6 | 7))
-    //     .find_any(|a| {
-    //         let register = Register { a: *a, ..register };
-    //         is_same(register, &program)
-    //     })
-    // let mut incs = vec![];
-    // let mut prev_a = 0;
-    // for a in 0..i64::MAX {
-    //     let register = Register { a, ..register };
-    //     let output = run_program(register, &program);
-    //     if output.len() < 7 {
-    //         continue;
-    //     }
-    //     if output[0..7] == program[0..7] {
-    //         println!("{:?}", a);
-    //         incs.push(a - prev_a);
-    //         prev_a = a;
-    //         println!("{:?}", incs);
-    //     }
-    // }
-    // None
+    let inc: i64 = incs.iter().sum();
+    let to_check = (range_start..range_end)
+        .step_by(inc as usize)
+        .collect::<Vec<_>>();
+    to_check.into_par_iter().find_first(|i| {
+        let register = Register { a: *i, ..register };
+        is_same(register, &program)
+    })
 }
 pub fn solve() -> Answer {
     let cur_dir = Path::new(file!()).parent().unwrap();
