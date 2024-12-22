@@ -63,69 +63,28 @@ fn print_grid(grid: &[Vec<i32>]) {
     }
 }
 
-fn find_cheats(grid: &[Vec<i32>], threshhold: i32) -> i32 {
+fn find_cheats(grid: &[Vec<i32>], threshhold: i32, cheat_time: usize) -> i32 {
     let mut cheats = 0;
-    let (n, m) = (grid.len(), grid[0].len());
-    for i in 1..n - 1 {
-        for j in 1..m - 1 {
-            if grid[i][j] != i32::MAX {
-                continue;
-            }
-            let above = grid[i - 1][j];
-            let below = grid[i + 1][j];
-            if above != i32::MAX && below != i32::MAX {
-                let time_saved = (above - below).abs() - 2;
-                if time_saved >= threshhold {
-                    // println!("({}, {}): {}", i, j, time_saved);
-                    cheats += 1;
-                }
-            }
-            let left = grid[i][j - 1];
-            let right = grid[i][j + 1];
-            if left != i32::MAX && right != i32::MAX {
-                let time_saved = (left - right).abs() - 2;
-                if time_saved >= threshhold {
-                    // println!("({}, {}): {}", i, j, time_saved);
-                    cheats += 1;
-                }
-            }
-        }
-    }
-    cheats
-}
-
-fn part_1(input: &str) -> Option<i32> {
-    let grid = convert_to_grid(input);
-    let dist = djikstra(&grid);
-    // println!("{:?}", dist);
-    // print_grid(&dist);
-    find_cheats(&dist, 100).into()
-}
-
-fn find_cheats_2(grid: &[Vec<i32>], threshhold: i32, cheat_time: usize) -> i32 {
-    let mut cheats = 0;
-    let (n, m) = (grid.len(), grid[0].len());
-    for from_i in 1..n - 1 {
-        for from_j in 1..m - 1 {
+    for from_i in 1..grid.len() - 1 {
+        for from_j in 1..grid[from_i].len() - 1 {
             if grid[from_i][from_j] == i32::MAX {
                 continue;
             }
-            for to_i in from_i..std::cmp::min(from_i + 1 + cheat_time, n - 1) {
-                let cheat_time_remain = cheat_time - (to_i - from_i);
-                // for to_j in std::..std::cmp::min(from_j + 1 + cheat_time_remain, m - 1) {
-                let mut to_j_start = std::cmp::max(1, from_j.saturating_sub(cheat_time_remain));
-                if to_i == from_i {
-                    to_j_start = from_j;
-                }
-                let to_j_end = std::cmp::min(from_j + cheat_time_remain, m - 1);
-                for to_j in to_j_start..=to_j_end {
+            let to_i_min = std::cmp::max(1, from_i.saturating_sub(cheat_time));
+            let to_i_max = std::cmp::min(from_i + cheat_time, grid.len() - 1);
+            for to_i in to_i_min..=to_i_max {
+                let cheat_time_remain =
+                    cheat_time - (to_i as isize - from_i as isize).unsigned_abs();
+                let to_j_min = std::cmp::max(1, from_j.saturating_sub(cheat_time_remain));
+                let to_j_max = std::cmp::min(from_j + cheat_time_remain, grid[to_i].len() - 1);
+                for to_j in to_j_min..=to_j_max {
                     if grid[to_i][to_j] == i32::MAX {
                         continue;
                     }
                     let manhattan =
                         (to_i as i32 - from_i as i32).abs() + (to_j as i32 - from_j as i32).abs();
                     // println!("({from_i},{from_j})->({to_i},{to_j}), manhattan: {manhattan}");
-                    let race_diff = (grid[from_i][from_j] - grid[to_i][to_j]).abs();
+                    let race_diff = grid[from_i][from_j] - grid[to_i][to_j];
                     let time_saved = race_diff - manhattan;
                     if time_saved >= threshhold {
                         cheats += 1;
@@ -137,11 +96,16 @@ fn find_cheats_2(grid: &[Vec<i32>], threshhold: i32, cheat_time: usize) -> i32 {
     cheats
 }
 
+fn part_1(input: &str) -> Option<i32> {
+    let grid = convert_to_grid(input);
+    let dist = djikstra(&grid);
+    find_cheats(&dist, 100, 2).into()
+}
+
 fn part_2(input: &str) -> Option<i32> {
     let grid = convert_to_grid(input);
     let dist = djikstra(&grid);
-    // print_grid(&dist);
-    find_cheats_2(&dist, 100, 20).into()
+    find_cheats(&dist, 100, 20).into()
 }
 pub fn solve() -> Answer {
     let cur_dir = Path::new(file!()).parent().unwrap();
