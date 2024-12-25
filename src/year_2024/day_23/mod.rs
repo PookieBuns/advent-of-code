@@ -4,7 +4,6 @@ use std::{
 };
 
 use itertools::Itertools;
-use rayon::prelude::*;
 
 use crate::Answer;
 
@@ -89,22 +88,6 @@ fn part_1(input: &str) -> Option<i32> {
     (interconnected_subgraphs.len() as i32).into()
 }
 
-fn is_fully_connected(graph: &HashMap<String, HashSet<String>>, nodes: Vec<&String>) -> bool {
-    nodes.iter().all(|&node| {
-        let neighbors = graph.get(node).unwrap();
-        if neighbors.len() < nodes.len() - 1 {
-            println!("{} has too few neighbors", node);
-            return false;
-        }
-        nodes.iter().all(|&other_node| {
-            if node == other_node {
-                return true;
-            }
-            neighbors.contains(other_node)
-        })
-    })
-}
-
 fn bron_kerbosch(
     graph: &HashMap<String, HashSet<String>>,
     r: HashSet<String>,
@@ -117,8 +100,7 @@ fn bron_kerbosch(
     let mut max_clique = HashSet::new();
     for node in p.clone() {
         let node_neighbors = graph.get(&node).unwrap();
-        let mut new_r = r.clone();
-        new_r.insert(node.clone());
+        let new_r = &r | &HashSet::from([node.clone()]);
         let new_p = &p & node_neighbors;
         let new_x = &x & node_neighbors;
         let reported = bron_kerbosch(graph, new_r, new_p, new_x);
