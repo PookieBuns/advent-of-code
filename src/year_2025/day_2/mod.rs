@@ -1,9 +1,30 @@
 use std::path::Path;
 
 use crate::Answer;
+use std::str::FromStr;
 
 fn part_1(input: &str) -> Option<impl std::string::ToString> {
-    None::<i32>
+    input.trim()
+        .split(',')
+        .filter_map(|s| s.split_once('-'))
+        .map(|(a, b)| (i64::from_str(a).unwrap()..=i64::from_str(b).unwrap()))
+        .map(|range| {
+            range
+                .filter(|num| {
+                    let digits = num.ilog10() + 1;
+                    if digits % 2 != 0 {
+                        return false;
+                    }
+                    let center = digits / 2;
+                    let num_str = num.to_string();
+                    let first_half = &num_str[..center as usize];
+                    let second_half = &num_str[center as usize..];
+                    first_half == second_half
+                })
+                .sum::<i64>()
+        })
+        .sum::<i64>()
+        .into()
 }
 
 fn part_2(input: &str) -> Option<impl std::string::ToString> {
