@@ -13,8 +13,8 @@ fn get_turn(line: &str) -> i32 {
     }
 }
 
-fn part_1(input: &str) -> Option<i32> {
-    let ans = input
+fn part_1(input: &str) -> Option<usize> {
+    input
         .lines()
         .scan(50, |dial, line| {
             let turn = get_turn(line);
@@ -22,8 +22,8 @@ fn part_1(input: &str) -> Option<i32> {
             Some(*dial)
         })
         .filter(|&x| x == 0)
-        .count() as i32;
-    ans.into()
+        .count()
+        .into()
 }
 
 fn part_2(input: &str) -> Option<i32> {
