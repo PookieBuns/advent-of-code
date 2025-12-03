@@ -19,6 +19,14 @@ fn main() {
     let args = Args::parse();
     let cur_dir = Path::new(file!()).parent().unwrap();
     let puzzle_dir = cur_dir.join(format!("year_{}/day_{}", args.year, args.day));
+    if !puzzle_dir.exists() {
+        std::fs::create_dir_all(&puzzle_dir).expect("Failed to create puzzle directory");
+    }
+    let answer_path = puzzle_dir.join("mod.rs");
+    if !answer_path.exists() {
+        let template_str = include_str!("../template/mod.rs");
+        std::fs::write(&answer_path, template_str).expect("Failed to write template mod.rs");
+    }
     let input_path = puzzle_dir.join("input.txt");
     let puzzle_path = puzzle_dir.join("puzzle.md");
     let client = AocClient::builder()

@@ -1,5 +1,6 @@
 // mod year_2023;
 mod year_2024;
+mod year_2025;
 
 pub struct Answer {
     pub part_1: Option<i64>,
@@ -71,6 +72,21 @@ pub fn route(year: i32, day: u32) -> Answer {
             24 => year_2024::day_24::solve(),
             25 => year_2024::day_25::solve(),
             _ => unimplemented!("Not implemented yet for 2024 day {day}"),
+        },
+        2025 => match day {
+            1 => year_2025::day_1::solve(),
+            // 2 => year_2025::day_2::solve(),
+            // 3 => year_2025::day_3::solve(),
+            // 4 => year_2025::day_4::solve(),
+            // 5 => year_2025::day_5::solve(),
+            // 6 => year_2025::day_6::solve(),
+            // 7 => year_2025::day_7::solve(),
+            // 8 => year_2025::day_8::solve(),
+            // 9 => year_2025::day_9::solve(),
+            // 10 => year_2025::day_10::solve(),
+            // 11 => year_2025::day_11::solve(),
+            // 12 => year_2025::day_12::solve(),
+            _ => unimplemented!("Not implemented yet for 2025 day {day}"),
         },
         _ => unimplemented!("Not implemented yet for year {year}"),
     }
