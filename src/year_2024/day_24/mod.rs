@@ -32,11 +32,11 @@ enum Op {
 
 #[allow(clippy::type_complexity)]
 fn create_gate_graph(
-    gates_str: &str,
+    gates_str: &'_ str,
 ) -> (
     HashMap<&str, Vec<&str>>,
     HashMap<&str, i64>,
-    HashMap<&str, Gate>,
+    HashMap<&str, Gate<'_>>,
 ) {
     gates_str
         .lines()

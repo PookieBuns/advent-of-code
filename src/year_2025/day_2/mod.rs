@@ -8,7 +8,7 @@ fn part_1(input: &str) -> Option<impl std::string::ToString> {
         .trim()
         .split(',')
         .filter_map(|s| s.split_once('-'))
-        .map(|(a, b)| (i64::from_str(a).unwrap()..=i64::from_str(b).unwrap()))
+        .map(|(a, b)| i64::from_str(a).unwrap()..=i64::from_str(b).unwrap())
         .map(|range| {
             range
                 .filter(|num| {
@@ -33,14 +33,14 @@ fn part_2(input: &str) -> Option<impl std::string::ToString> {
         .trim()
         .split(',')
         .filter_map(|s| s.split_once('-'))
-        .map(|(a, b)| (i64::from_str(a).unwrap()..=i64::from_str(b).unwrap()))
+        .map(|(a, b)| i64::from_str(a).unwrap()..=i64::from_str(b).unwrap())
         .map(|range| {
             range
                 .filter(|num| {
                     let num_str = num.to_string();
                     let digits = (num.ilog10() + 1) as usize;
                     (1..=digits / 2)
-                        .filter(|seq_len| digits % seq_len == 0)
+                        .filter(|seq_len| digits.is_multiple_of(*seq_len))
                         .any(|seq_len| {
                             let seq_times = digits / seq_len;
                             let first_substr = &num_str[..seq_len];

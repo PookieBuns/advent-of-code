@@ -24,7 +24,7 @@ fn dp(stone: i64, remain: i64) -> i64 {
     match stone {
         0 => dp(1, remain - 1),
         s if (s.ilog10() + 1) % 2 == 0 => {
-            let mid = (s.ilog10() + 1) / 2;
+            let mid = s.ilog10().div_ceil(2);
             let left = s / 10_i64.pow(mid);
             let right = s % 10_i64.pow(mid);
             dp(left, remain - 1) + dp(right, remain - 1)

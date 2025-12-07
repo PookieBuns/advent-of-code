@@ -81,7 +81,7 @@ pub fn route(year: i32, day: u32) -> Answer {
             2 => year_2025::day_2::solve(),
             3 => year_2025::day_3::solve(),
             4 => year_2025::day_4::solve(),
-            // 5 => year_2025::day_5::solve(),
+            5 => year_2025::day_5::solve(),
             // 6 => year_2025::day_6::solve(),
             // 7 => year_2025::day_7::solve(),
             // 8 => year_2025::day_8::solve(),
