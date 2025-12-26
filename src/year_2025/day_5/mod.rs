@@ -28,17 +28,18 @@ fn part_1(input: &str) -> Option<impl std::string::ToString> {
 
 fn merge_intervals(mut intervals: Vec<(i64, i64)>) -> Vec<(i64, i64)> {
     intervals.sort();
-    intervals.into_iter().fold(Vec::new(), |mut acc, (start, end)| {
-        if let Some((_, last_end)) = acc.last_mut() {
-            if start <= *last_end {
-                *last_end = (*last_end).max(end);               
-                return acc;
+    intervals
+        .into_iter()
+        .fold(Vec::new(), |mut acc, (start, end)| {
+            if let Some((_, last_end)) = acc.last_mut() {
+                if start <= *last_end {
+                    *last_end = (*last_end).max(end);
+                    return acc;
+                }
             }
-        }       
-        acc.push((start, end));
-        acc
-
-    })
+            acc.push((start, end));
+            acc
+        })
 }
 
 fn part_2(input: &str) -> Option<impl std::string::ToString> {
@@ -51,7 +52,11 @@ fn part_2(input: &str) -> Option<impl std::string::ToString> {
         })
         .collect::<Vec<_>>();
     let merged = merge_intervals(intervals);
-    merged.iter().map(|(start, end)| end - start + 1).sum::<i64>().into()
+    merged
+        .iter()
+        .map(|(start, end)| end - start + 1)
+        .sum::<i64>()
+        .into()
 }
 pub fn solve() -> Answer {
     let cur_dir = Path::new(file!()).parent().unwrap();

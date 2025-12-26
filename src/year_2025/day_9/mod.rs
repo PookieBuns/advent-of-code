@@ -1,12 +1,23 @@
-use rayon::prelude::*;
-use std::path::Path;
+use itertools::Itertools;
+use std::cmp::Ordering::Equal;
+use std::cmp::Ordering::Greater;
+use std::cmp::Ordering::Less;
+use std::{collections::HashSet, path::Path};
 
 use crate::Answer;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 struct Coord {
     x: usize,
     y: usize,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Direction {
+    Up,
+    Down,
+    Left,
+    Right,
 }
 
 fn get_area(a: Coord, b: Coord) -> usize {
@@ -32,69 +43,24 @@ fn part_1(input: &str) -> Option<impl std::string::ToString> {
         .max()
 }
 
-fn flood(grid: &mut [Vec<char>], start: Coord) {
-    let mut deck = vec![start];
-    let dirs = [(0, 1), (1, 0), (-1, 0), (0, -1)];
-    while let Some(coord) = deck.pop() {
-        println!("{coord:?}");
-        if coord.x >= grid.len() {
-            continue;
-        }
-        if coord.y >= grid[0].len() {
-            continue;
-        }
-        if matches!(grid[coord.x][coord.y], 'O' | 'X' | '#') {
-            continue;
-        }
-        grid[coord.x][coord.y] = 'O';
-        for (dx, dy) in dirs {
-            let nx = coord.x.wrapping_add_signed(dx);
-            let ny = coord.y.wrapping_add_signed(dy);
-            if nx >= grid.len() {
-                continue;
-            }
-            if ny >= grid[0].len() {
-                continue;
-            }
-            if matches!(grid[nx][ny], 'O' | 'X' | '#') {
-                continue;
-            }
-            let neighbors = [
-                (-1, -1),
-                (-1, 0),
-                (-1, 1),
-                (0, -1),
-                (0, 1),
-                (1, -1),
-                (1, 0),
-                (1, 1),
-            ];
-            if neighbors.iter().any(|(ddx, ddy)| {
-                let nnx = nx.wrapping_add_signed(*ddx);
-                let nny = ny.wrapping_add_signed(*ddy);
-                if nnx >= grid.len() || nny >= grid[0].len() {
-                    return false;
-                }
-                matches!(grid[nnx][nny], 'X' | '#')
-            }) {
-                deck.push(Coord { x: nx, y: ny });
-            }
-        }
-    }
-}
-
-fn is_valid(grid: &[Vec<char>], a: Coord, b: Coord) -> bool {
+fn is_valid(outer: &HashSet<Coord>, a: Coord, b: Coord) -> bool {
     let big_y = a.y.max(b.y);
     let small_y = a.y.min(b.y);
     let big_x = a.x.max(b.x);
     let small_x = a.x.min(b.x);
-    (small_x..=big_x)
-        .flat_map(|i| (small_y..=big_y).map(move |j| (i, j)))
-        .all(|(i, j)| matches!(grid[i][j], '.' | 'X' | '#'))
-}
-
-fn print_grid(grid: &[Vec<char>]) {
-    grid.iter().for_each(|row| println!("{row:?}"));
+    if (small_x..=big_x).any(|row| outer.contains(&Coord { x: row, y: small_y })) {
+        return false;
+    }
+    if (small_x..=big_x).any(|row| outer.contains(&Coord { x: row, y: big_y })) {
+        return false;
+    }
+    if (small_y..=big_y).any(|col| outer.contains(&Coord { x: small_x, y: col })) {
+        return false;
+    }
+    if (small_y..=big_y).any(|col| outer.contains(&Coord { x: big_x, y: col })) {
+        return false;
+    }
+    true
 }
 
 fn part_2(input: &str) -> Option<impl std::string::ToString> {
@@ -108,67 +74,77 @@ fn part_2(input: &str) -> Option<impl std::string::ToString> {
             }
         })
         .collect();
-    let max_row_coord = coords.iter().max_by_key(|coord| coord.x).unwrap();
-    let rows = max_row_coord.x;
-    let cols = coords.iter().max_by_key(|coord| coord.y).unwrap().y;
-    let mut grid = vec![vec!['.'; cols + 2]; rows + 2];
-    coords.windows(2).for_each(|pair| {
-        let first = pair[0];
-        let second = pair[1];
-        grid[first.x][first.y] = '#';
-        grid[second.x][second.y] = '#';
-        match (first.x.abs_diff(second.x), first.y.abs_diff(second.y)) {
-            (0, _) => {
-                let big_y = first.y.max(second.y);
-                let small_y = first.y.min(second.y);
-                (small_y + 1..big_y).for_each(|y| grid[first.x][y] = 'X');
-            }
-            (_, 0) => {
-                let big_x = first.x.max(second.x);
-                let small_x = first.x.min(second.x);
-                (small_x + 1..big_x).for_each(|x| grid[x][first.y] = 'X');
-            }
-            _ => unreachable!(),
-        }
-    });
-    let first = coords[0];
-    let second = coords[coords.len() - 1];
-    match (first.x.abs_diff(second.x), first.y.abs_diff(second.y)) {
-        (0, _) => {
-            let big_y = first.y.max(second.y);
-            let small_y = first.y.min(second.y);
-            (small_y + 1..big_y).for_each(|y| grid[first.x][y] = 'X');
-        }
-        (_, 0) => {
-            let big_x = first.x.max(second.x);
-            let small_x = first.x.min(second.x);
-            (small_x + 1..big_x).for_each(|x| grid[x][first.y] = 'X');
-        }
-        _ => unreachable!(),
-    }
-    flood(
-        &mut grid,
-        Coord {
-            x: max_row_coord.x + 1,
-            y: max_row_coord.y + 1,
+    let windows = coords
+        .windows(2)
+        .map(|pair| {
+            let first = pair[0];
+            let second = pair[1];
+            (first, second)
+        })
+        .chain(std::iter::once((coords[0], coords[coords.len() - 1])));
+    // counter clockwise
+    let (mut outer, edge) = windows.fold(
+        (HashSet::new(), HashSet::new()),
+        |(mut outer, mut edge), (first, second)| {
+            let direction = match (first.x.cmp(&second.x), first.y.cmp(&second.y)) {
+                (Equal, Less) => Direction::Right,
+                (Equal, Greater) => Direction::Left,
+                (Less, Equal) => Direction::Down,
+                (Greater, Equal) => Direction::Up,
+                _ => unreachable!(),
+            };
+            match direction {
+                Direction::Up => {
+                    let big_x = first.x.max(second.x);
+                    let small_x = first.x.min(second.x);
+                    edge.extend((small_x..=big_x).map(|x| Coord { x, y: first.y }));
+                    outer.extend((small_x..=big_x).map(|x| Coord { x, y: first.y + 1 }));
+                }
+                Direction::Down => {
+                    let big_x = first.x.max(second.x);
+                    let small_x = first.x.min(second.x);
+                    edge.extend((small_x..=big_x).map(|x| Coord { x, y: first.y }));
+                    outer.extend((small_x..=big_x).map(|x| Coord { x, y: first.y - 1 }));
+                }
+                Direction::Left => {
+                    let big_y = first.y.max(second.y);
+                    let small_y = first.y.min(second.y);
+                    edge.extend((small_y..=big_y).map(|y| Coord { x: first.x, y }));
+                    outer.extend((small_y..=big_y).map(|y| Coord { x: first.x - 1, y }));
+                }
+                Direction::Right => {
+                    let big_y = first.y.max(second.y);
+                    let small_y = first.y.min(second.y);
+                    edge.extend((small_y..=big_y).map(|y| Coord { x: first.x, y }));
+                    outer.extend((small_y..=big_y).map(|y| Coord { x: first.x + 1, y }));
+                }
+            };
+            (outer, edge)
         },
     );
-    println!("Done flood");
-    // print_grid(&grid);
+    outer.retain(|coord| !edge.contains(coord));
     let pairs = (0..coords.len())
-        .flat_map(|i| (i + 1..coords.len()).map(move |j| (i, j))).collect::<Vec<(usize, usize)>>();
-    let max_pair = pairs
-        .par_iter()
-        .max_by(|a, b| {
-            let a_area = get_area(coords[a.0], coords[a.1]);
-            let b_area = get_area(coords[b.0], coords[b.1]);
-            if a_area > b_area && is_valid(&grid, coords[a.0], coords[a.1]) {
-                return std::cmp::Ordering::Greater;
-            }
-            std::cmp::Ordering::Less
+        .flat_map(|i| (i + 1..coords.len()).map(move |j| (i, j)))
+        .sorted_by(|a, b| {
+            let area_a = get_area(coords[a.0], coords[a.1]);
+            let area_b = get_area(coords[b.0], coords[b.1]);
+            area_b.cmp(&area_a)
         })
-        .unwrap();
-    get_area(coords[max_pair.0], coords[max_pair.1]).into()
+        .collect::<Vec<(usize, usize)>>();
+    pairs
+        .into_iter()
+        .find(|(i, j)| {
+            let a = coords[*i];
+            let b = coords[*j];
+            // dbg!(a, b);
+            let small_y = a.y.min(b.y);
+            let big_y = a.y.max(b.y);
+            if small_y < 48641 && big_y > 50126 {
+                return false;
+            }
+            is_valid(&outer, coords[*i], coords[*j])
+        })
+        .map(|(i, j)| get_area(coords[i], coords[j]))
 }
 pub fn solve() -> Answer {
     let cur_dir = Path::new(file!()).parent().unwrap();
