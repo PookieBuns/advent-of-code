@@ -87,7 +87,7 @@ pub fn route(year: i32, day: u32) -> Answer {
             8 => year_2025::day_8::solve(),
             9 => year_2025::day_9::solve(),
             10 => year_2025::day_10::solve(),
-            // 11 => year_2025::day_11::solve(),
+            11 => year_2025::day_11::solve(),
             // 12 => year_2025::day_12::solve(),
             _ => unimplemented!("Not implemented yet for 2025 day {day}"),
         },
